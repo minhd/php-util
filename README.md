@@ -9,5 +9,10 @@ composer dump-autoload --optimize
 
 # Test
 ```
-phpunit
+vendor/bin/phpunit
+```
+
+# Documentation
+```
+vendor/bin/phpdoc
 ```
