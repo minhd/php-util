@@ -306,8 +306,170 @@ class StringUtil
      * @param $str
      * @return int
      */
-    public function wordCount($str)
+    public static function wordCount($str)
     {
         return strlen($str);
+    }
+
+    /**
+     * Nice formatting for computer sizes (Bytes).
+     *
+     * @param   integer $bytes The number in bytes to format
+     * @param   integer $decimals The number of decimal points to include
+     * @return  string
+     */
+    public static function sizeFormat($bytes, $decimals = 0)
+    {
+        $bytes = floatval($bytes);
+        if ($bytes < 1024) {
+            return $bytes . ' B';
+        } elseif ($bytes < pow(1024, 2)) {
+            return number_format($bytes / 1024, $decimals, '.', '') . ' KiB';
+        } elseif ($bytes < pow(1024, 3)) {
+            return number_format($bytes / pow(1024, 2), $decimals, '.', '') . ' MiB';
+        } elseif ($bytes < pow(1024, 4)) {
+            return number_format($bytes / pow(1024, 3), $decimals, '.', '') . ' GiB';
+        } elseif ($bytes < pow(1024, 5)) {
+            return number_format($bytes / pow(1024, 4), $decimals, '.', '') . ' TiB';
+        } elseif ($bytes < pow(1024, 6)) {
+            return number_format($bytes / pow(1024, 5), $decimals, '.', '') . ' PiB';
+        } else {
+            return number_format($bytes / pow(1024, 5), $decimals, '.', '') . ' PiB';
+        }
+    }
+
+    /**
+     * Converts many english words that equate to true or false to boolean.
+     *
+     * Supports 'y', 'n', 'yes', 'no' and a few other variations.
+     *
+     * @param  string $string The string to convert to boolean
+     * @param  bool $default The value to return if we can't match any yes/no words
+     * @return boolean
+     */
+    public static function strToBool($string, $default = false)
+    {
+        $yes_words = 'affirmative|all right|aye|indubitably|most assuredly|ok|of course|okay|sure thing|y|yes+|yea|yep|sure|yeah|true|t|on|1|oui|vrai';
+        $no_words = 'no*|no way|nope|nah|na|never|absolutely not|by no means|negative|never ever|false|f|off|0|non|faux';
+        if (preg_match('/^(' . $yes_words . ')$/i', $string)) {
+            return true;
+        } elseif (preg_match('/^(' . $no_words . ')$/i', $string)) {
+            return false;
+        }
+        return $default;
+    }
+
+    /**
+     * Check if a string contains another string.
+     *
+     * @param  string $haystack
+     * @param  string $needle
+     * @return boolean
+     */
+    public static function strContains($haystack, $needle)
+    {
+        return strpos($haystack, $needle) !== false;
+    }
+
+    /**
+     * Check if a string contains another string. This version is case
+     * insensitive.
+     *
+     * @param  string $haystack
+     * @param  string $needle
+     * @return boolean
+     */
+    public static function strContainsI($haystack, $needle)
+    {
+        return stripos($haystack, $needle) !== false;
+    }
+
+    /**
+     * Wrapper to prevent errors if the user doesn't have the mbstring
+     * extension installed.
+     *
+     * @param  string $encoding
+     * @return string
+     */
+    protected static function mbInternalEncoding($encoding = null)
+    {
+        if (function_exists('mb_internal_encoding')) {
+            return $encoding ? mb_internal_encoding($encoding) : mb_internal_encoding();
+        }
+        // @codeCoverageIgnoreStart
+        return 'UTF-8';
+        // @codeCoverageIgnoreEnd
+    }
+
+    /**
+     * Pads a given string with zeroes on the left.
+     *
+     * @param  int $number The number to pad
+     * @param  int $length The total length of the desired string
+     * @return string
+     */
+    public static function zeroPad($number, $length)
+    {
+        return str_pad($number, $length, '0', STR_PAD_LEFT);
+    }
+
+
+    /**
+     * Returns the IP address of the client.
+     *
+     * @param   boolean $trust_proxy_headers Whether or not to trust the
+     *                                       proxy headers HTTP_CLIENT_IP
+     *                                       and HTTP_X_FORWARDED_FOR. ONLY
+     *                                       use if your server is behind a
+     *                                       proxy that sets these values
+     * @return  string
+     */
+    public static function get_client_ip($trust_proxy_headers = false)
+    {
+        if (!$trust_proxy_headers) {
+            return $_SERVER['REMOTE_ADDR'];
+        }
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        return $ip;
+    }
+
+    /**
+     * Truncate the string to given length of characters.
+     *
+     * @param string $string The variable to truncate
+     * @param integer $limit The length to truncate the string to
+     * @param string $append Text to append to the string IF it gets
+     *                        truncated, defaults to '...'
+     * @return string
+     */
+    public static function truncate($string, $limit = 100, $append = '...')
+    {
+        if (mb_strlen($string) <= $limit) {
+            return $string;
+        }
+        return rtrim(mb_substr($string, 0, $limit, 'UTF-8')) . $append;
+    }
+
+    /**
+     * Truncate the string to given length of words.
+     *
+     * @param $string
+     * @param $limit
+     * @param string $append
+     * @return string
+     */
+    public static function truncateWords($string, $limit = 100, $append = '...')
+    {
+        preg_match('/^\s*+(?:\S++\s*+){1,' . $limit . '}/u', $string, $matches);
+        if (!isset($matches[0]) || strlen($string) === strlen($matches[0])) {
+            return $string;
+        }
+        return rtrim($matches[0]) . $append;
     }
 }

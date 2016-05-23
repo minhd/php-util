@@ -99,7 +99,10 @@ class StringUtilTest extends PHPUnit_Framework_TestCase
      */
     public function testReplaceAll()
     {
+        $this->assertEquals("aacc", SU::replaceAll("abc", "b", "ac"));
     }
+
+
 
     /**
      * todo
@@ -113,4 +116,44 @@ class StringUtilTest extends PHPUnit_Framework_TestCase
         parent::__construct();
         require_once(dirname(__FILE__) . "/../vendor/autoload.php");
     }
+
+    public function testSizeFormat()
+    {
+        $size = SU::sizeFormat( 512, 0 );
+        $this->assertEquals( '512 B', $size );
+        $size = SU::sizeFormat( 2048, 1 );
+        $this->assertEquals( '2.0 KiB', $size );
+        $size = SU::sizeFormat( 25151251, 2 );
+        $this->assertEquals( '23.99 MiB', $size );
+        $size = SU::sizeFormat( 19971597926, 2 );
+        $this->assertEquals( '18.60 GiB', $size );
+        $size = SU::sizeFormat( 2748779069440, 1 );
+        $this->assertEquals( '2.5 TiB', $size );
+        $size = SU::sizeFormat( 2.81475e15, 1 );
+        $this->assertEquals( '2.5 PiB', $size );
+        $size = SU::sizeFormat( 2.81475e19, 1 );
+        $this->assertEquals( '25000.0 PiB', $size );
+    }
+
+    public function testStrToBool()
+    {
+        $this->assertTrue( SU::strToBool( 'true' ) );
+        $this->assertTrue( SU::strToBool( 'yes' ) );
+        $this->assertTrue( SU::strToBool( 'y' ) );
+        $this->assertTrue( SU::strToBool( 'oui' ) );
+        $this->assertTrue( SU::strToBool( 'vrai' ) );
+        $this->assertFalse( SU::strToBool( 'false' ) );
+        $this->assertFalse( SU::strToBool( 'no' ) );
+        $this->assertFalse( SU::strToBool( 'n' ) );
+        $this->assertFalse( SU::strToBool( 'non' ) );
+        $this->assertFalse( SU::strToBool( 'faux' ) );
+        $this->assertFalse( SU::strToBool( 'test' , false) );
+    }
+
+    public function testZeroPad()
+    {
+        $this->assertEquals( '00000341', SU::zeroPad( 341, 8 ) );
+        $this->assertEquals( '341', SU::zeroPad( 341, 1 ) );
+    }
+
 }
